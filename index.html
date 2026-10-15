@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A free, privacy-friendly campaign URL builder for creating consistent UTM tracking links.">
+  <title>Campaign Link Studio</title>
+  <style>
+    :root { color-scheme: light; --ink:#18212f; --muted:#64748b; --line:#dbe2ea; --paper:#f5f7fb; --brand:#3457d5; --brand-dark:#243fa8; --good:#166534; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+    header { background:#fff; border-bottom:1px solid var(--line); padding:24px 20px; }
+    .wrap { width:min(100% - 32px, 980px); margin:auto; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .logo { display:grid; place-items:center; width:42px; height:42px; border-radius:12px; background:var(--brand); color:white; font-weight:800; }
+    h1 { margin:0; font-size:clamp(1.35rem,3vw,1.9rem); letter-spacing:-.03em; }
+    .tagline { color:var(--muted); margin:4px 0 0; }
+    main { padding:28px 0 48px; }
+    .layout { display:grid; grid-template-columns:1.1fr .9fr; gap:20px; align-items:start; }
+    .card { background:white; border:1px solid var(--line); border-radius:18px; padding:22px; box-shadow:0 6px 24px #18212f08; }
+    h2 { font-size:1.1rem; margin:0 0 16px; }
+    label { display:block; font-weight:650; font-size:.92rem; margin:14px 0 6px; }
+    input, select, textarea { width:100%; border:1px solid #cbd5e1; border-radius:10px; padding:11px 12px; color:var(--ink); background:#fff; font:inherit; }
+    input:focus, select:focus, textarea:focus { outline:3px solid #3457d52b; border-color:var(--brand); }
+    .hint { color:var(--muted); font-size:.82rem; margin:5px 0 0; }
+    .buttons { display:flex; flex-wrap:wrap; gap:9px; margin-top:20px; }
+    button { border:0; border-radius:10px; padding:11px 15px; font:inherit; font-weight:700; cursor:pointer; }
+    button.primary { background:var(--brand); color:white; }
+    button.primary:hover { background:var(--brand-dark); }
+    button.secondary { background:#eef2ff; color:#263c9b; }
+    button.ghost { background:#f1f5f9; color:var(--ink); }
+    button:focus-visible { outline:3px solid #3457d55c; outline-offset:2px; }
+    .result { overflow-wrap:anywhere; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:12px; padding:14px; min-height:74px; }
+    .status { min-height:24px; color:var(--good); font-size:.9rem; margin-top:8px; }
+    .preview-list { display:grid; gap:9px; margin-top:14px; }
+    .preview-row { display:grid; grid-template-columns:135px 1fr; gap:12px; font-size:.9rem; padding-bottom:9px; border-bottom:1px solid #edf0f4; }
+    .preview-row span:first-child { color:var(--muted); }
+    .small-title { margin:22px 0 8px; font-size:.98rem; }
+    .note { color:var(--muted); font-size:.88rem; }
+    footer { color:var(--muted); text-align:center; padding:18px; font-size:.85rem; }
+    @media(max-width:760px) { .layout { grid-template-columns:1fr; } .card { padding:18px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap brand">
+      <div class="logo" aria-hidden="true">CL</div>
+      <div>
+        <h1>Campaign Link Studio</h1>
+        <p class="tagline">Create consistent campaign tracking links — free, simple, and private.</p>
+      </div>
+    </div>
+  </header>
+  <main class="wrap">
+    <div class="layout">
+      <section class="card" aria-labelledby="builder-title">
+        <h2 id="builder-title">Build your campaign URL</h2>
+        <form id="builder">
+          <label for="url">Destination URL <span aria-hidden="true">*</span></label>
+          <input id="url" type="url" placeholder="https://example.com/product" required>
+          <p class="hint">Use the full destination URL, including https://</p>
+
+          <label for="source">Campaign source (utm_source) *</label>
+          <input id="source" required placeholder="e.g. instagram, newsletter, google">
+
+          <label for="medium">Campaign medium (utm_medium) *</label>
+          <input id="medium" required placeholder="e.g. social, email, cpc">
+
+          <label for="campaign">Campaign name (utm_campaign) *</label>
+          <input id="campaign" required placeholder="e.g. autumn_launch_2026">
+
+          <label for="term">Campaign term (utm_term)</label>
+          <input id="term" placeholder="Optional: paid search keyword">
+
+          <label for="content">Campaign content (utm_content)</label>
+          <input id="content" placeholder="Optional: ad variant or CTA">
+          <div class="buttons">
+            <button class="primary" type="submit">Generate link</button>
+            <button class="ghost" type="reset">Clear form</button>
+          </div>
+        </form>
+      </section>
+
+      <aside class="card" aria-labelledby="result-title">
+        <h2 id="result-title">Your tracking link</h2>
+        <div id="result" class="result" aria-live="polite">Your generated URL will appear here.</div>
+        <div class="buttons">
+          <button class="primary" id="copy" type="button" disabled>Copy URL</button>
+          <button class="secondary" id="download" type="button" disabled>Download CSV</button>
+        </div>
+        <p id="status" class="status" role="status"></p>
+        <h3 class="small-title">UTM parameter preview</h3>
+        <div id="preview" class="preview-list">
+          <div class="preview-row"><span>utm_source</span><span>—</span></div>
+          <div class="preview-row"><span>utm_medium</span><span>—</span></div>
+          <div class="preview-row"><span>utm_campaign</span><span>—</span></div>
+          <div class="preview-row"><span>utm_term</span><span>—</span></div>
+          <div class="preview-row"><span>utm_content</span><span>—</span></div>
+        </div>
+        <p class="note">Everything runs in your browser. This tool does not send your URLs to a server or use analytics cookies.</p>
+      </aside>
+    </div>
+  </main>
+  <footer>Campaign Link Studio · Open source · Made for clearer campaign measurement</footer>
+  <script>
+    const form = document.querySelector("#builder");
+    const result = document.querySelector("#result");
+    const status = document.querySelector("#status");
+    const copyButton = document.querySelector("#copy");
+    const downloadButton = document.querySelector("#download");
+    const preview = document.querySelector("#preview");
+    let currentUrl = "";
+
+    const fields = [
+      ["source", "utm_source"],
+      ["medium", "utm_medium"],
+      ["campaign", "utm_campaign"],
+      ["term", "utm_term"],
+      ["content", "utm_content"]
+    ];
+
+    function clean(value) {
+      return value.trim().replace(/\s+/g, "_");
+    }
+
+    function renderPreview(values) {
+      preview.replaceChildren();
+      fields.forEach(([id, key]) => {
+        const row = document.createElement("div");
+        row.className = "preview-row";
+        const name = document.createElement("span");
+        name.textContent = key;
+        const value = document.createElement("span");
+        value.textContent = values[id] || "—";
+        row.append(name, value);
+        preview.append(row);
+      });
+    }
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      status.textContent = "";
+      try {
+        const destination = new URL(document.querySelector("#url").value.trim());
+        if (!["http:", "https:"].includes(destination.protocol)) {
+          throw new Error("Please use an http or https destination URL.");
+        }
+        const values = {};
+        fields.forEach(([id]) => values[id] = clean(document.querySelector("#" + id).value));
+        if (!values.source || !values.medium || !values.campaign) {
+          throw new Error("Please complete source, medium, and campaign name.");
+        }
+        fields.forEach(([id, key]) => {
+          if (values[id]) destination.searchParams.set(key, values[id]);
+          else destination.searchParams.delete(key);
+        });
+        currentUrl = destination.toString();
+        result.textContent = currentUrl;
+        copyButton.disabled = false;
+        downloadButton.disabled = false;
+        renderPreview(values);
+      } catch (error) {
+        currentUrl = "";
+        result.textContent = error.message || "Please enter a valid URL.";
+        copyButton.disabled = true;
+        downloadButton.disabled = true;
+      }
+    });
+
+    copyButton.addEventListener("click", async () => {
+      if (!currentUrl) return;
+      try {
+        await navigator.clipboard.writeText(currentUrl);
+        status.textContent = "Link copied to clipboard.";
+      } catch {
+        status.textContent = "Copy was blocked by your browser. Select and copy the URL above.";
+      }
+    });
+
+    downloadButton.addEventListener("click", () => {
+      if (!currentUrl) return;
+      const rows = [["destination_url", "tracking_url"], [document.querySelector("#url").value.trim(), currentUrl]];
+      const csv = rows.map(row => row.map(value => '"' + String(value).replace(/"/g, '""') + '"').join(",")).join("\r\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "campaign-link.csv";
+      link.click();
+      URL.revokeObjectURL(link.href);
+      status.textContent = "CSV download started.";
+    });
+
+    form.addEventListener("reset", () => {
+      currentUrl = "";
+      result.textContent = "Your generated URL will appear here.";
+      status.textContent = "";
+      copyButton.disabled = true;
+      downloadButton.disabled = true;
+      renderPreview({});
+    });
+  </script>
+</body>
+</html>
